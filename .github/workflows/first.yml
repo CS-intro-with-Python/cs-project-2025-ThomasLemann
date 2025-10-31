@@ -1,0 +1,16 @@
+name: Setup
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build image
+        run: docker build -t new_image:latest .
+      - name: Run container
+        run: docker run --name container_1 new_image:latest
+      - name: install python
+        run: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run client
+        run: python client.py
