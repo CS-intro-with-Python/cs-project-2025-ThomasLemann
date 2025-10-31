@@ -9,7 +9,7 @@ jobs:
       - name: Build image
         run: docker build -t new_image:latest .
       - name: Run container
-        run: docker run -d --name container_1 new_image:latest
+        run: docker run -p 8080:8080 -d --name container_1 new_image:latest
       - name: install python
         uses: actions/setup-python@v5
         with:
