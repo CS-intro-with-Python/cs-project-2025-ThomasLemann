@@ -9,7 +9,7 @@ jobs:
       - name: Run container
         run: docker run --name container_1 new_image:latest
       - name: install python
-        run: actions/setup-python@v5
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Run client
