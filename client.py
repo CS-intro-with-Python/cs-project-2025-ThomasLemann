@@ -4,6 +4,7 @@ import sys
 responseone = requests.get('http://127.0.0.1:8080/')
 
 if responseone.status_code != 200:
+    print(responseone.text)
     sys.exit(1)
 else:
     print(responseone.text)
