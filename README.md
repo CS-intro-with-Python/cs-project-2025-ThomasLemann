@@ -44,3 +44,4 @@ Describe the criteria by which the success of the project can be determined
 
 ## Railway
 cs-project-2025-thomaslemann-production.up.railway.app
+https://cs-project-2025-thomaslemann-production-3ffe.up.railway.app/
