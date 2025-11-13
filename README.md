@@ -10,13 +10,16 @@ The idea of project is to create a browser game (puzzle), where user can log in 
 Describe the steps to set up the environment and run the application. This can be a bash script or docker commands.
 
 ```
-Your commands
+docker build -t new_image:latest .
+docker run -p 8080:8080 -d --name container_1 new_image:latest
+pip install -r requirements.txt
+python client.py
 
 ```
 
 ## Requirements
 
-Python 3.12-slim
+Python 3.11
 
 ## Features
 
