@@ -12,3 +12,11 @@ else:
     print(f"{OK} Server is working correctly{RST}")
     print("::notice title=Healthcheck passed::Responce is adequate")
     print(responseone.text)
+
+responsetwo = requests.get('http://127.0.0.1:8080/user/usrnm')
+
+print(responsetwo.text)
+
+responsethree = requests.get('http://127.0.0.1:8080/search?q=python&length=17')
+
+print(responsethree.text)
