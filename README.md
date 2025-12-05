@@ -1,9 +1,9 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/DESIFpxz)
-# CS_2025_project
+# CS_2025_project: Note-taking application
 
 ## Description
 
-The idea of project is to create a browser game (puzzle), where user can log in and try to solve puzzles. Each puzzle is a picture cut into pieces.
+Application allows to create, edit and then delete notes. It is possible to organize, tag, search and filter them.
 
 ## Setup
 
@@ -38,9 +38,10 @@ I will have my project on a main branch
 Describe the criteria by which the success of the project can be determined
 (this will be updated in the future)
 
-* Criteria 1: working system of sign up and log in
-* Criteria 2: puzzles work correctly and write a message when completed
-* Criteria 3: users can create new puzzle games
+* Criteria 1: working system of sign up and log in.
+* Criteria 2: Notes can be created or deleted.
+* Criteria 3: After editing the note, made changes are saved.
+* Criteria 3: Notes can obtain different tags, which will be used in search filters.
 
 ## Railway
 cs-project-2025-thomaslemann-production.up.railway.app
