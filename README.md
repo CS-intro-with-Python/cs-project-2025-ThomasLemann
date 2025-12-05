@@ -41,7 +41,7 @@ Describe the criteria by which the success of the project can be determined
 * Criteria 1: working system of sign up and log in.
 * Criteria 2: Notes can be created or deleted.
 * Criteria 3: After editing the note, made changes are saved.
-* Criteria 3: Notes can obtain different tags, which will be used in search filters.
+* Criteria 4: Notes can obtain different tags, which will be used in search filters.
 
 ## Railway
 cs-project-2025-thomaslemann-production.up.railway.app
