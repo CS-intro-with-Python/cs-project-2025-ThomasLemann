@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>Welcome to the NoteBook</p>
+
+<form action="/login" method="POST">
+    <input type="email" name="email">
+    <input type="password" name="password">
+    <button id="submitEmail">Submit</button>
+</form>
+
+<form action="/note" method="POST">
+    <button id="goToNotes">Write a note</button>
+</form>
+
+{% endblock %}

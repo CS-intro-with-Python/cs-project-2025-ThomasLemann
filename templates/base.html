@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Notebook{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>Notes</h1>
+        <hr>
+    </header>
+
+    <main>
+        {% block content %}
+
+        {% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p>© 2025</p>
+    </footer>
+</body>
+</html>

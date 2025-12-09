@@ -1,20 +1,20 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET', "POST"])
 def hello():
-    return jsonify({'message': 'Hello, World!'})
+    return render_template('main.html')
 
-@app.route('/user/<string:username>')
-def user(username):
-    return jsonify({'username': f"Hello, {username}!"})
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    return render_template('login.html', email=email, password=password)
 
-@app.route('/search')
-def search():
-    query = request.args.get('q')
-    number_of_characters = int(request.args.get('length', 1))
-    return jsonify({"query": query, "length": number_of_characters})
+@app.route('/note', methods=['GET', 'POST'])
+def note():
+    return render_template('note.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
