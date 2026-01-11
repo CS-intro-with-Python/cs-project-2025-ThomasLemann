@@ -7,7 +7,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
       - name: Build image
-        run: docker build -t postgres:latest .
+        run: docker build -t my-notebook-postgres:latest .
       - name: Run container, create database
         run: |
           docker run -d --name notebook-postgres \
