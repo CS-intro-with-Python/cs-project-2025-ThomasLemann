@@ -2,36 +2,216 @@
 
 {% block content %}
 
-<h2>All Notes</h2>
+<form action="/" method="GET" style="display:inline;">
+    <button id="goHome">Home</button>
+</form>
 
-<a href="{{ url_for('note') }}"><button>Back</button></a>
+<h2>All Notes by {{ session.get('email') }}</h2>
 
-<div style="display:flex; flex-wrap: wrap; margin-top:20px;">
+<form method="GET" action="{{ url_for('all_notes') }}" id="searchForm" style="margin: 15px 0;">
+
+    <!-- 🔍 Search by title -->
+    <input
+        type="text"
+        name="q"
+        placeholder="Search by title..."
+        value="{{ search_query }}"
+        style="padding:5px; width:200px;"
+    >
+
+    <br><br>
+
+    <!-- 🏷 Tags -->
+    <div id="tagsContainer">
+        {% if tags %}
+            {% for tag in tags %}
+                <input
+                    type="text"
+                    name="tags[]"
+                    value="{{ tag }}"
+                    placeholder="Tag"
+                    style="padding:5px; width:120px; margin-right:5px;"
+                >
+            {% endfor %}
+        {% else %}
+            <input
+                type="text"
+                name="tags[]"
+                placeholder="Tag"
+                style="padding:5px; width:120px; margin-right:5px;"
+            >
+        {% endif %}
+    </div>
+
+    <button type="button" onclick="addTagField()">+</button>
+
+    <br><br>
+
+    <button type="submit">Search</button>
+    <button type="button" onclick="clearFilters()">Clear</button>
+
+</form>
+
+<!-- Контейнер заметок -->
+<div id="notesContainer" style="display:flex; flex-wrap: wrap; margin-top:20px;">
     {% if notes %}
         {% for note in notes %}
-        <div style="margin:10px; text-align:center">
-            <img src="{{ note.img }}" width="200">
+        <div class="noteItem" id="note-{{ note.id }}" style="margin:10px; text-align:center; border:1px solid #ccc; padding:10px;">
+            {% if note.header %}
+                <h3 style="max-width:200px; word-wrap:break-word;">{{ note.header }}</h3>
+            {% endif %}
+
             <p style="max-width:200px; word-wrap: break-word;">
-                {% if note.text|length > 50 %}
+                {% if note.tags %}
+                    {% set tag_list = note.tags.split(',') %}
+                    {% set tag_strs = [] %}
+                    {% for tag in tag_list %}
+                        {% if tag.strip() %}
+                            {% set _ = tag_strs.append('#' ~ tag.strip()) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% set tag_str = tag_strs | join(', ') %}
+                    {% if tag_str|length > 50 %}
+                        {{ tag_str[:50] }}...
+                    {% else %}
+                        {{ tag_str }}
+                    {% endif %}
+                {% endif %}
+            </p>
+
+            <img src="{{ note.img }}" width="200">
+
+            <p style="max-width:200px; word-wrap: break-word;">
+                {% if note.text and note.text|length > 50 %}
                     {{ note.text[:50] }}...
                 {% else %}
                     {{ note.text }}
                 {% endif %}
             </p>
+
             <div style="margin-top:5px;">
-                <form method="POST" action="{{ url_for('delete_note') }}" style="display:inline;">
-                    <input type="hidden" name="filename" value="{{ note.filename }}">
-                    <button type="submit">Delete</button>
-                </form>
-                <a href="{{ url_for('note', filename=note.filename) }}">
-                    <button type="button">Edit</button>
-                </a>
+                <a href="{{ url_for('note', note_id=note.id) }}"><button type="button">Edit</button></a>
+                <button type="button" onclick="deleteNote({{ note.id }})">Delete</button>
             </div>
         </div>
         {% endfor %}
     {% else %}
-        <p>No saved drawings yet.</p>
+        <p>No saved notes yet.</p>
     {% endif %}
 </div>
+
+<a href="{{ url_for('note') }}">
+    <button>Write a new note</button>
+</a>
+
+<script>
+function addTagField() {
+    const container = document.getElementById("tagsContainer");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.name = "tags[]";
+    input.placeholder = "Tag";
+    input.style.padding = "5px";
+    input.style.width = "120px";
+    input.style.marginRight = "5px";
+    container.appendChild(input);
+}
+
+// AJAX-поиск
+document.getElementById("searchForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    fetchNotes();
+});
+
+function fetchNotes() {
+    const form = document.getElementById("searchForm");
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+
+    fetch(`/all_notes?${params.toString()}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById("notesContainer");
+        container.innerHTML = "";
+
+        if (data.length === 0) {
+            container.innerHTML = "<p>No saved notes found.</p>";
+            return;
+        }
+
+        data.forEach(note => {
+            let tagStr = "";
+            if (note.tags) {
+                const tagsArr = note.tags.split(",").map(t => "#" + t.trim()).filter(t => t !== "#");
+                tagStr = tagsArr.join(", ");
+                if (tagStr.length > 50) tagStr = tagStr.slice(0, 50) + "...";
+            }
+
+            let textPreview = note.text || "";
+            if (textPreview.length > 50) textPreview = textPreview.slice(0, 50) + "...";
+
+            const noteDiv = document.createElement("div");
+            noteDiv.className = "noteItem";
+            noteDiv.style = "margin:10px; text-align:center; border:1px solid #ccc; padding:10px;";
+            noteDiv.innerHTML = `
+                ${note.header ? `<h3 style="max-width:200px; word-wrap:break-word;">${note.header}</h3>` : ""}
+                <p style="max-width:200px; word-wrap: break-word;">${tagStr}</p>
+                <img src="${note.img}" width="200">
+                <p style="max-width:200px; word-wrap: break-word;">${textPreview}</p>
+                <div style="margin-top:5px;">
+                    <a href="/note/${note.id}"><button type="button">Edit</button></a>
+                    <form method="POST" action="/delete_note" style="display:inline;">
+                        <input type="hidden" name="note_id" value="${note.id}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
+            `;
+            container.appendChild(noteDiv);
+        });
+    })
+    .catch(err => console.error(err));
+}
+
+function clearFilters() {
+    const form = document.getElementById("searchForm");
+
+    // Очищаем текст поиска
+    form.querySelector("input[name='q']").value = "";
+
+    // Очищаем все поля тегов кроме первого
+    const tagInputs = form.querySelectorAll("input[name='tags[]']");
+    tagInputs.forEach((input, idx) => {
+        if (idx === 0) input.value = "";
+        else input.remove();
+    });
+
+    // Загружаем заметки без фильтров
+    fetchNotes();
+}
+function deleteNote(noteId) {
+    if (!confirm("Are you sure you want to delete this note?")) return;
+
+    fetch("/delete_note", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: `note_id=${noteId}`
+    })
+    .then(response => {
+        if (response.ok) {
+            // Удаляем элемент из DOM
+            const noteDiv = document.getElementById(`note-${noteId}`);
+            if (noteDiv) noteDiv.remove();
+        } else {
+            console.error("Failed to delete note");
+        }
+    })
+    .catch(err => console.error(err));
+}
+</script>
 
 {% endblock %}

@@ -9,6 +9,15 @@
     <header>
         <h1>Notes</h1>
         <hr>
+        {% if session.get('user_id') %}
+        <form action="/logout" method="GET" style="display:inline;">
+            <button type="submit">Log out</button>
+        </form>
+        {% else %}
+        <form action="/login" method="GET" style="display:inline;">
+            <button type="submit">Log in</button>
+        </form>
+        {% endif %}
     </header>
 
     <main>

@@ -2,118 +2,218 @@
 
 {% block content %}
 
-<p>Write your notes here:</p>
-<div style="position: relative; width: 800px; height: 600px;">
-    <canvas id="drawingCanvas" width="800" height="600"
-            style="border:1px solid #000; position:absolute; left:0; top:0;"></canvas>
-
-    <canvas id="cursorCanvas" width="800" height="600"
-            style="position:absolute; left:0; top:0; pointer-events:none;"></canvas>
+<!-- 🔹 Top Buttons: Logout, Home -->
+<div style="margin-bottom: 20px;">
+    <a href="/"><button>Home</button></a>
 </div>
-<p>
-    Color: <input type="color" id="colorPicker" value="#000000"> <br>
-    Width: <input type="range" id="brushSize" min="1" max="40" value="5">
-</p>
-<button id="eraserBtn">Eraser</button>
-<button id="penBtn">Pen</button> <br>
-<button id="clearBtn">Clear</button> <br>
 
-<p>Optional Text for Note:</p>
+<!-- 🔹 Write your note header -->
+<h2>Write your note</h2>
 
-<form method="POST" id="saveForm">
-    <textarea id="textNote" name="textNote" rows="4" cols="50">{{ text_note }}</textarea> <br>
+<!-- 🔹 Note Form -->
+<form method="POST" id="saveForm"
+      action="{{ url_for('note', note_id=note_id) if note_id else url_for('note') }}">
+
+    <!-- Header -->
+    <p>
+        <label for="noteHeader"><strong>Header:</strong></label><br>
+        <input
+            type="text"
+            id="noteHeader"
+            name="noteHeader"
+            value="{{ note_header if note_header else '' }}"
+            style="width: 800px;"
+            placeholder="Enter note header">
+    </p>
+
+    <!-- Tags -->
+    <div style="margin-bottom: 10px;">
+        <button type="button" id="tagsBtn">Tags</button>
+    </div>
+
+    <div id="tagsContainer" style="display:none; margin-bottom:10px;">
+        {% if tags %}
+            {% for tag in tags.split(',') %}
+            <div class="tag-row" style="margin-bottom:5px;">
+                <input type="text" name="tags[]" value="{{ tag }}">
+                <button type="button" class="deleteTagBtn">delete</button>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="tag-row" style="margin-bottom:5px;">
+                <input type="text" name="tags[]" placeholder="Tag">
+                <button type="button" class="deleteTagBtn">delete</button>
+            </div>
+        {% endif %}
+
+        <button type="button" id="addTagBtn">+</button>
+    </div>
+
+    <!-- Canvas and tools -->
+    <div style="position: relative; width: 800px; height: 600px; margin-bottom: 10px;">
+        <canvas id="drawingCanvas" width="800" height="600"
+                style="border:1px solid #000; position:absolute; left:0; top:0;"></canvas>
+
+        <canvas id="cursorCanvas" width="800" height="600"
+                style="position:absolute; left:0; top:0; pointer-events:none;"></canvas>
+    </div>
+
+    <!-- Tools: Color, Brush, Eraser, Pen, Width, Clear -->
+    <div style="margin-bottom: 20px;">
+        <label>Color: <input type="color" id="colorPicker" value="#000000"></label><br>
+        <label>Width: <input type="range" id="brushSize" min="1" max="40" value="5"></label><br>
+        <button type="button" id="eraserBtn">Eraser</button>
+        <button type="button" id="penBtn">Pen</button>
+        <button type="button" id="clearBtn">Clear</button>
+    </div>
+
+    <!-- Optional Text -->
+    <p>Optional Text for Note:</p>
+    <textarea id="textNote" name="textNote" rows="4" cols="50">{{ text_note }}</textarea>
+
+    <br><br>
+
+    <!-- Hidden image data -->
     <input type="hidden" name="imageData" id="imageData">
-    <input type="hidden" name="originalFilename" value="{{ original_filename or '' }}">
+
+    <!-- Save button -->
     <button type="submit" id="saveBtn">Save Note</button>
-</form> <hr>
+</form>
 
-<a href="{{ url_for('all_notes') }}"><button>All notes</button></a>
+<!-- All notes -->
+<hr>
+<a href="/all_notes"><button>All notes</button></a>
 
+<!-- JS (без изменений, кроме сохранения порядка) -->
 <script>
-const canvas = document.getElementById("drawingCanvas");
-const ctx = canvas.getContext("2d");
+    const canvas = document.getElementById("drawingCanvas");
+    const ctx = canvas.getContext("2d");
 
-const cursorCanvas = document.getElementById("cursorCanvas");
-const cursorCtx = cursorCanvas.getContext("2d");
+    const cursorCanvas = document.getElementById("cursorCanvas");
+    const cursorCtx = cursorCanvas.getContext("2d");
 
-const colorPicker = document.getElementById("colorPicker");
-const brushSize = document.getElementById("brushSize");
-const eraserBtn = document.getElementById("eraserBtn");
-const penBtn = document.getElementById("penBtn");
-const clearBtn = document.getElementById("clearBtn");
-const saveForm = document.getElementById("saveForm");
+    const colorPicker = document.getElementById("colorPicker");
+    const brushSize = document.getElementById("brushSize");
+    const eraserBtn = document.getElementById("eraserBtn");
+    const penBtn = document.getElementById("penBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const saveForm = document.getElementById("saveForm");
 
-let drawing = false;
-let isEraser = false;
+    let drawing = false;
+    let isEraser = false;
 
-{% if image_data %}
-let img = new Image();
-img.onload = function() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0);
-};
-img.src = "{{ image_data }}";
-{% endif %}
+    {% if image_data %}
+    let img = new Image();
+    img.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+    };
+    img.src = "{{ image_data }}";
+    {% endif %}
 
-canvas.addEventListener("mousedown", (e) => {
-    drawing = true;
-    ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
-});
-
-canvas.addEventListener("mousemove", (e) => {
-    const x = e.offsetX;
-    const y = e.offsetY;
-    const size = brushSize.value;
-
-    cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
-
-    if (isEraser) {
-        cursorCtx.strokeStyle = "black";
-        cursorCtx.lineWidth = 1;
-        cursorCtx.beginPath();
-        cursorCtx.arc(x, y, size / 2, 0, Math.PI * 2);
-        cursorCtx.stroke();
-    }
-
-    if (!drawing) return;
-
-    if (isEraser) {
+    canvas.addEventListener("mousedown", (e) => {
+        drawing = true;
         ctx.beginPath();
-        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-        ctx.fill();
-    } else {
-        ctx.strokeStyle = colorPicker.value;
-        ctx.lineWidth = size;
-        ctx.lineCap = "round";
-        ctx.lineTo(x, y);
-        ctx.stroke();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+        const x = e.offsetX;
+        const y = e.offsetY;
+        const size = brushSize.value;
+
+        cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+
+        if (isEraser) {
+            cursorCtx.strokeStyle = "black";
+            cursorCtx.lineWidth = 1;
+            cursorCtx.beginPath();
+            cursorCtx.arc(x, y, size / 2, 0, Math.PI * 2);
+            cursorCtx.stroke();
+        }
+
+        if (!drawing) return;
+
+        if (isEraser) {
+            ctx.beginPath();
+            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            ctx.strokeStyle = colorPicker.value;
+            ctx.lineWidth = size;
+            ctx.lineCap = "round";
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+    });
+
+    canvas.addEventListener("mouseup", () => drawing = false);
+    canvas.addEventListener("mouseleave", () => drawing = false);
+
+    eraserBtn.addEventListener("click", () => {
+        isEraser = true;
+        ctx.globalCompositeOperation = "destination-out";
+    });
+
+    penBtn.addEventListener("click", () => {
+        isEraser = false;
+        ctx.globalCompositeOperation = "source-over";
+    });
+
+    clearBtn.addEventListener("click", () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    saveForm.addEventListener("submit", (e) => {
+        const imageData = canvas.toDataURL("image/png");
+        document.getElementById("imageData").value = imageData;
+    });
+
+    const tagsBtn = document.getElementById("tagsBtn");
+    const tagsContainer = document.getElementById("tagsContainer");
+    const addTagBtn = document.getElementById("addTagBtn");
+
+    let tagsVisible = false;
+    tagsBtn.addEventListener("click", () => {
+        tagsVisible = !tagsVisible;
+        tagsContainer.style.display = tagsVisible ? "block" : "none";
+    });
+
+    function createTagRow() {
+        const row = document.createElement("div");
+        row.className = "tag-row";
+        row.style.marginBottom = "5px";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = "tags[]";
+        input.placeholder = "Tag";
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.textContent = "delete";
+        delBtn.style.marginLeft = "5px";
+
+        delBtn.addEventListener("click", () => {
+            row.remove();
+        });
+
+        row.appendChild(input);
+        row.appendChild(delBtn);
+
+        return row;
     }
-});
 
-canvas.addEventListener("mouseup", () => drawing = false);
-canvas.addEventListener("mouseleave", () => drawing = false);
+    addTagBtn.addEventListener("click", () => {
+        const row = createTagRow();
+        tagsContainer.insertBefore(row, addTagBtn);
+    });
 
-eraserBtn.addEventListener("click", () => {
-    isEraser = true;
-    ctx.globalCompositeOperation = "destination-out";
-});
-
-penBtn.addEventListener("click", () => {
-    isEraser = false;
-    ctx.globalCompositeOperation = "source-over";
-});
-
-clearBtn.addEventListener("click", () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-});
-
-saveForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const imageData = canvas.toDataURL("image/png");
-    document.getElementById("imageData").value = imageData;
-    saveForm.submit();
-});
+    document.querySelectorAll("#tagsContainer .tag-row button").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.target.parentElement.remove();
+        });
+    });
 </script>
 
 {% endblock %}

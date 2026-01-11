@@ -2,16 +2,22 @@
 
 {% block content %}
 
-<p>Welcome to the NoteBook</p>
+{% if session.get('user_id') %}
+    <p>Welcome to the NoteBook, {{ session.get('email') }}</p>
+{% else %}
+    <p>Welcome to the NoteBook</p>
+{% endif %}
 
-<form action="/login" method="POST">
-    <input type="email" name="email">
-    <input type="password" name="password">
-    <button id="submitEmail">Submit</button>
+<form action="/note" method="GET">
+    <button id="goToNotes">Write a note</button>
 </form>
 
-<form action="/note" method="POST">
-    <button id="goToNotes">Write a note</button>
+<a href="/all_notes">
+    <button>All notes</button>
+</a>
+
+<form action="/all_users" method="GET">
+    <button id="goToAllUsers">All users</button>
 </form>
 
 {% endblock %}

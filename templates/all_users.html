@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>All users</h2>
+
+<form action="/" method="GET">
+    <button id="goToHome">Home</button>
+</form>
+
+<br>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Email</th>
+        <th>Password (hash)</th>
+        <th>Action</th>
+    </tr>
+
+    {% for user in users %}
+    <tr>
+        <td>{{ user.email }}</td>
+        <td style="font-size: 12px;">{{ user.password }}</td>
+        <td>
+            <form action="/delete_user" method="POST" style="display:inline;">
+                <input type="hidden" name="email" value="{{ user.email }}">
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -7,9 +7,15 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
       - name: Build image
-        run: docker build -t new_image:latest .
-      - name: Run container
-        run: docker run -p 8080:8080 -d --name container_1 new_image:latest
+        run: docker build -t postgres:latest .
+      - name: Run container, create database
+        run: |
+          docker run -d --name notebook-postgres \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=password \
+            -e POSTGRES_DB=notebook \
+            -p 5432:5432 \
+            my-notebook-postgres:latest
       - name: install python
         uses: actions/setup-python@v5
         with:
@@ -27,5 +33,3 @@ jobs:
               sleep 2
             fi
           done
-      - name: Run client
-        run: python client.py
