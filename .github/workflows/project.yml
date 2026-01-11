@@ -6,16 +6,22 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Build image
-        run: docker build -t my-notebook-postgres:latest .
-      - name: Run container, create database
+      - name: Run Postres
         run: |
           docker run -d --name notebook-postgres \
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=password \
             -e POSTGRES_DB=notebook \
             -p 5432:5432 \
-            my-notebook-postgres:latest
+            postgres:latest
+      - name: Build image
+        run: docker build -t my-notebook:latest .
+      - name: Run app
+        run: |
+          docker run -d --name notebook-postgres \
+            --link notebook-postgres:postgres \
+            -p 8080:8080 \
+            my-notebook:latest
       - name: install python
         uses: actions/setup-python@v5
         with:
