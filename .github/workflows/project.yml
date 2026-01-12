@@ -1,41 +1,29 @@
 name: Setup
+
 on: [push, pull_request]
+
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Run Postres
+
+      - name: Build and run containers
+        run: docker compose up -d --build
+
+      - name: Wait for Flask
         run: |
-          docker run -d --name notebook-postgres \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=password \
-            -e POSTGRES_DB=notebook \
-            -p 5432:5432 \
-            postgres:latest
-      - name: Build image
-        run: docker build -t my-notebook:latest .
-      - name: Run app
-        run: |
-          docker run -d --name notebook-postgres \
-            --link notebook-postgres:postgres \
-            -p 8080:8080 \
-            my-notebook:latest
-      - name: install python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install requirements
-        run: pip install -r requirements.txt
-      - name: Wait for server to be ready
-        run: |
-          for i in {1..10}; do
-            if curl -s http://127.0.0.1:8080/; then
-              echo "Server is up!"
-              break
-            else
-              echo "Waiting for server..."
-              sleep 2
+          for i in {1..15}; do
+            if curl -s http://127.0.0.1:8080/ > /dev/null; then
+              echo "Flask is up"
+              exit 0
             fi
+            sleep 2
           done
+          echo "Flask did not start"
+          exit 1
+
+      - name: Stop containers
+        run: docker compose down

@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, g, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import time
 
 # -------------------- Logger init --------------------
 import logger
@@ -10,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = "secret-key"
 
 # -------------------- SQLAlchemy config --------------------
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/notebook"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@postgres:5432/notebook"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
@@ -38,9 +39,17 @@ class Note(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# -------------------- DB init --------------------
+# -------------------- DB init (wait for initialization) --------------------
 with app.app_context():
-    db.create_all()
+    for i in range(10):
+        try:
+            db.create_all()
+            break
+        except Exception as e:
+            print(f"DB not ready, retry {i+1}/10")
+            time.sleep(2)
+    else:
+        raise RuntimeError("Database not available")
 
 
 # -------------------- Logging --------------------
