@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build and run containers
-        run: docker compose up -d --build
+        run: docker compose up -d --build web postgres
 
       - name: Wait for server
         run: |
@@ -24,7 +24,10 @@ jobs:
           done
           echo "Flask did not start"
           exit 1
-      
+
+      - name: Run client
+        run: docker compose run --rm client
+
       - name: Run tests
         run: docker compose exec -T web env PYTHONPATH=/app pytest tests/unit_tests.py
 

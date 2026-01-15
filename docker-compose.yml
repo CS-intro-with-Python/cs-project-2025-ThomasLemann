@@ -25,5 +25,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  client:
+    build: .
+    depends_on:
+      - web
+    command: ["python", "client.py"]
+
 volumes:
   postgres_data:
