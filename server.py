@@ -11,7 +11,10 @@ app = Flask(__name__)
 app.secret_key = "secret-key"
 
 # -------------------- SQLAlchemy config --------------------
+# For Git Actions
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@postgres:5432/notebook"
+# For localhost server
+# app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/notebook"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
@@ -111,7 +114,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("login")) # redirect on /login
+    return redirect(url_for("hello")) # redirect on /
 
 
 @app.route("/all_users")
@@ -151,14 +154,14 @@ def note(note_id=None):
         tags_list = request.form.getlist("tags[]")
         tags = ",".join(tag.strip() for tag in tags_list if tag.strip())
 
-        if note_id:
+        if note_id: # Edit old note
             note_obj = Note.query.filter_by(id=note_id, user_id=session["user_id"]).first()
             if note_obj:
                 note_obj.header = note_header
                 note_obj.image_data = image_data
                 note_obj.text = text_note
                 note_obj.tags = tags
-        else:
+        else: # Save new note
             note_obj = Note(
                 user_id=session["user_id"],
                 header=note_header,

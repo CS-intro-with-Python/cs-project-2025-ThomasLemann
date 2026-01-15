@@ -2,19 +2,15 @@
 
 {% block content %}
 
-<!-- 🔹 Top Buttons: Logout, Home -->
 <div style="margin-bottom: 20px;">
     <a href="/"><button>Home</button></a>
 </div>
 
-<!-- 🔹 Write your note header -->
 <h2>Write your note</h2>
 
-<!-- 🔹 Note Form -->
 <form method="POST" id="saveForm"
       action="{{ url_for('note', note_id=note_id) if note_id else url_for('note') }}">
 
-    <!-- Header -->
     <p>
         <label for="noteHeader"><strong>Header:</strong></label><br>
         <input
@@ -26,7 +22,6 @@
             placeholder="Enter note header">
     </p>
 
-    <!-- Tags -->
     <div style="margin-bottom: 10px;">
         <button type="button" id="tagsBtn">Tags</button>
     </div>
@@ -49,7 +44,6 @@
         <button type="button" id="addTagBtn">+</button>
     </div>
 
-    <!-- Canvas and tools -->
     <div style="position: relative; width: 800px; height: 600px; margin-bottom: 10px;">
         <canvas id="drawingCanvas" width="800" height="600"
                 style="border:1px solid #000; position:absolute; left:0; top:0;"></canvas>
@@ -58,7 +52,6 @@
                 style="position:absolute; left:0; top:0; pointer-events:none;"></canvas>
     </div>
 
-    <!-- Tools: Color, Brush, Eraser, Pen, Width, Clear -->
     <div style="margin-bottom: 20px;">
         <label>Color: <input type="color" id="colorPicker" value="#000000"></label><br>
         <label>Width: <input type="range" id="brushSize" min="1" max="40" value="5"></label><br>
@@ -67,24 +60,19 @@
         <button type="button" id="clearBtn">Clear</button>
     </div>
 
-    <!-- Optional Text -->
     <p>Optional Text for Note:</p>
     <textarea id="textNote" name="textNote" rows="4" cols="50">{{ text_note }}</textarea>
 
     <br><br>
 
-    <!-- Hidden image data -->
     <input type="hidden" name="imageData" id="imageData">
 
-    <!-- Save button -->
     <button type="submit" id="saveBtn">Save Note</button>
 </form>
 
-<!-- All notes -->
 <hr>
 <a href="/all_notes"><button>All notes</button></a>
 
-<!-- JS (без изменений, кроме сохранения порядка) -->
 <script>
     const canvas = document.getElementById("drawingCanvas");
     const ctx = canvas.getContext("2d");

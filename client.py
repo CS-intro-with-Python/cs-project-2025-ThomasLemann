@@ -13,7 +13,7 @@ else:
     print("::notice title=Healthcheck passed::Response is adequate")
     print(responseone.text)
 
-responsetwo = requests.get('http://127.0.0.1:8080/user/usrnm')
+responsetwo = requests.get('http://127.0.0.1:8080/login')
 
 if responsetwo.status_code != 200:
     print(f"{ERR}Error occured{RST}")
@@ -23,7 +23,7 @@ else:
     print("::notice title=Healthcheck passed::Response is adequate")
     print(responsetwo.text)
 
-responsethree = requests.get('http://127.0.0.1:8080/search?q=python&length=17')
+responsethree = requests.get('http://127.0.0.1:8080/note')
 
 if responsethree.status_code != 200:
     print(f"{ERR}Error occured{RST}")

@@ -13,7 +13,7 @@ jobs:
       - name: Build and run containers
         run: docker compose up -d --build
 
-      - name: Wait for Flask
+      - name: Wait for server
         run: |
           for i in {1..15}; do
             if curl -s http://127.0.0.1:8080/ > /dev/null; then
@@ -24,6 +24,9 @@ jobs:
           done
           echo "Flask did not start"
           exit 1
+      
+      - name: Run tests
+        run: docker compose exec -T server pytest tests/unit_tests.py
 
       - name: Stop containers
         run: docker compose down
