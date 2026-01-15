@@ -26,7 +26,7 @@ jobs:
           exit 1
       
       - name: Run tests
-        run: docker compose exec -T server pytest tests/unit_tests.py
+        run: docker compose exec -T web pytest tests/unit_tests.py
 
       - name: Stop containers
         run: docker compose down
