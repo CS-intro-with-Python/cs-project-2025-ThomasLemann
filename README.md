@@ -26,8 +26,8 @@ Python 3.11
 Describe the main features the application performs.
 
 * Feature 1: log in system
-* Feature 2: different levels: from change of pictures to number of pieces
-* Feature 3: ability to create your own puzzles (user can send picture to server, and it can be then cut into pieces and solved as a puzzle game)
+* Feature 2: creating notes which can be text or drawn picture
+* Feature 3: searching system with filters by tags or headers
 
 ## Git
 
